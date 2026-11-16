@@ -1,4 +1,4 @@
-﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $base = "http://127.0.0.1:8001/api/v1"
 $pass = 0; $fail = 0
 function Check($name, $ok, $detail = "") {
