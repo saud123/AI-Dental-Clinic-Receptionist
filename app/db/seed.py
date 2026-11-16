@@ -3,7 +3,7 @@
 Run from project root:
     python -m app.db.seed
 
-Idempotent: if admin@clinic.local exists, it skips.
+Idempotent: if admin@dentalclinic.com exists, it skips.
 """
 from datetime import datetime, timedelta, timezone, date
 
@@ -21,13 +21,13 @@ def seed() -> None:
     db: Session = SessionLocal()
     try:
         # Idempotency: if admin exists, skip
-        if db.query(User).filter(User.email == "admin@clinic.local").first():
-            print("Seed skipped — admin@clinic.local already exists.")
+        if db.query(User).filter(User.email == "admin@dentalclinic.com").first():
+            print("Seed skipped — admin@dentalclinic.com already exists.")
             return
 
         # 1. Admin
         admin = User(
-            email="admin@clinic.local",
+            email="admin@dentalclinic.com",
             hashed_password=hash_password("admin123"),
             full_name="Clinic Admin",
             role=UserRole.ADMIN,
@@ -36,13 +36,13 @@ def seed() -> None:
 
         # 2. Doctors
         dr_ahmed_user = User(
-            email="ahmed@clinic.local",
+            email="ahmed@dentalclinic.com",
             hashed_password=hash_password("doctor123"),
             full_name="Dr. Ahmed Khan",
             role=UserRole.DOCTOR,
         )
         dr_sara_user = User(
-            email="sara@clinic.local",
+            email="sara@dentalclinic.com",
             hashed_password=hash_password("doctor123"),
             full_name="Dr. Sara Malik",
             role=UserRole.DOCTOR,
@@ -70,7 +70,7 @@ def seed() -> None:
         # 3. Assistant
         db.add(
             User(
-                email="assistant@clinic.local",
+                email="assistant@dentalclinic.com",
                 hashed_password=hash_password("assistant123"),
                 full_name="Front Desk Assistant",
                 role=UserRole.ASSISTANT,
@@ -136,13 +136,13 @@ def seed() -> None:
 
         db.commit()
         print("✅ Seed completed.")
-        print("  Admin:     admin@clinic.local     / admin123")
-        print("  Doctors:   ahmed@clinic.local     / doctor123")
-        print("             sara@clinic.local      / doctor123")
-        print("  Assistant: assistant@clinic.local / assistant123")
-        print("  Patients:  ali@example.com        / patient123")
-        print("             fatima@example.com     / patient123")
-        print("             usman@example.com      / patient123")
+        print("  Admin:     admin@dentalclinic.com     / admin123")
+        print("  Doctors:   ahmed@dentalclinic.com     / doctor123")
+        print("             sara@dentalclinic.com      / doctor123")
+        print("  Assistant: assistant@dentalclinic.com / assistant123")
+        print("  Patients:  ali@example.com            / patient123")
+        print("             fatima@example.com         / patient123")
+        print("             usman@example.com          / patient123")
     except Exception as e:
         db.rollback()
         print(f"❌ Seed failed: {e}")
