@@ -1,0 +1,28 @@
+# ── Python ────────────────────────────────
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Env / secrets ─────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── IDE ───────────────────────────────────
+.vscode/
+.idea/
+
+# ── OS ────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────────
+*.log
+
+# ── Local DB / uploads ────────────────────
+*.sqlite3
+uploads/
