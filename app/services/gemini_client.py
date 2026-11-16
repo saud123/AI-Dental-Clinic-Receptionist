@@ -1,9 +1,18 @@
-﻿"""Thin wrapper around the Gemini SDK."""
+import json
+from typing import Literal
+
 import google.generativeai as genai
+
 from app.core.config import settings
+
+# Configure once at import time
 genai.configure(api_key=settings.GEMINI_API_KEY)
+
+
 _chat_model = genai.GenerativeModel(settings.GEMINI_CHAT_MODEL)
 _classifier_model = genai.GenerativeModel(settings.GEMINI_CLASSIFIER_MODEL)
+
+
 def generate_reply(
     system_instruction: str,
     history: list[dict],
@@ -12,6 +21,11 @@ def generate_reply(
     temperature: float = 0.4,
     max_output_tokens: int = 400,
 ) -> str:
+    """Generate a chat reply using Gemini.
+
+    history = [{"role": "user"|"model", "parts": ["..."]}, ...]
+    """
+    # Gemini chat session: pass history + new message
     model = genai.GenerativeModel(
         settings.GEMINI_CHAT_MODEL,
         system_instruction=system_instruction,
@@ -25,7 +39,15 @@ def generate_reply(
         },
     )
     return (response.text or "").strip()
+
+
 def classify_clinic_related(message: str) -> bool:
+    """Fast YES/NO check: is this message about the dental clinic?
+
+    Used as the first guardrail layer.
+    Falls back to True (allow) if the model fails, so a bad classifier
+    never blocks a real patient.
+    """
     prompt = (
         "You are a binary classifier for a DENTAL CLINIC assistant.\n"
         "Answer ONLY with the word YES or NO.\n\n"
@@ -51,10 +73,17 @@ def classify_clinic_related(message: str) -> bool:
         answer = (response.text or "").strip().upper()
         return answer.startswith("YES")
     except Exception:
+        # Fail open — if the classifier errors, allow the message
         return True
+
+
 def embed_text(text: str) -> list[float]:
+    """Return a 768-dim embedding for the given text."""
+    model_name = settings.GEMINI_EMBEDDING_MODEL
+    if not model_name.startswith("models/") and not model_name.startswith("tunedModels/"):
+        model_name = f"models/{model_name}"
     result = genai.embed_content(
-        model=settings.GEMINI_EMBEDDING_MODEL,
+        model=model_name,
         content=text,
         task_type="retrieval_document",
     )

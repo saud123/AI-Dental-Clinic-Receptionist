@@ -41,15 +41,15 @@ def _check_availability(
             [AppointmentStatus.BOOKED, AppointmentStatus.RESCHEDULED]
         ),
         Appointment.scheduled_at < end,
-        Appointment.scheduled_at + timedelta(minutes=Appointment.duration_minutes) > start,
     )
     if exclude_id:
         q = q.filter(Appointment.id != exclude_id)
-    if q.first():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Time slot already booked",
-        )
+    for appt in q.all():
+        if appt.scheduled_at + timedelta(minutes=appt.duration_minutes) > start:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Time slot already booked",
+            )
 
 
 def book_appointment(db: Session, patient: User, data: AppointmentCreate) -> Appointment:
@@ -149,16 +149,20 @@ def create_availability_block(
     db.add(block)
 
     # Find overlapping booked appointments
-    overlapping = (
+    candidates = (
         db.query(Appointment)
         .filter(
             Appointment.doctor_id == doctor_id,
             Appointment.status == AppointmentStatus.BOOKED,
             Appointment.scheduled_at < data.end_time,
-            Appointment.scheduled_at + timedelta(minutes=Appointment.duration_minutes) > data.start_time,
         )
         .all()
     )
+    overlapping = [
+        appt
+        for appt in candidates
+        if appt.scheduled_at + timedelta(minutes=appt.duration_minutes) > data.start_time
+    ]
     affected_ids = []
     for appt in overlapping:
         appt.status = AppointmentStatus.RESCHEDULED_PENDING
@@ -166,4 +170,12 @@ def create_availability_block(
 
     db.commit()
     db.refresh(block)
+
+    if affected_ids:
+        try:
+            from app.services import reminder_service
+            reminder_service.create_reschedule_reminders_for_block(db, block, affected_ids)
+        except Exception:
+            pass
+
     return block, affected_ids
