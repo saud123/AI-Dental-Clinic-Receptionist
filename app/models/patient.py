@@ -1,6 +1,6 @@
 from datetime import datetime, date
 from sqlalchemy import String, DateTime, Date, ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
 
 from app.db.session import Base
 
@@ -19,4 +19,4 @@ class PatientProfile(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    user = relationship("User", backref="patient_profile")
+    user = relationship("User", backref=backref("patient_profile", uselist=False))
