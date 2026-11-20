@@ -57,6 +57,7 @@ def seed() -> None:
                 bio="12 years experience, braces and aligners specialist.",
                 working_hours="Mon-Fri 9am-5pm",
                 is_available=True,
+                price = 200,
             ),
             DoctorProfile(
                 user_id=dr_sara_user.id,
@@ -64,6 +65,7 @@ def seed() -> None:
                 bio="General checkups, cleanings, fillings.",
                 working_hours="Mon-Sat 10am-6pm",
                 is_available=True,
+                price = 100,
             ),
         ])
 

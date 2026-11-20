@@ -1,5 +1,6 @@
 from app.models.user import User, UserRole
 from app.models.patient import PatientProfile
+from app.models.notification import Notification    
 from app.models.doctor import DoctorProfile, AvailabilityBlock
 from app.models.appointment import Appointment, AppointmentStatus
 from app.models.chat import (

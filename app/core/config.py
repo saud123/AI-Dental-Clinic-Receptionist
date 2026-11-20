@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     RESEND_API_KEY: str = ""
     EMAIL_FROM: str = "onboarding@resend.dev"
 
-    ELEVENLABS_API_KEY: str = ""
+    ELEVENLABS_API_KEY: str = "sk_aa8114f667e9a3abe43d0a7d14efa48314e47676b16decc7"
     ELEVENLABS_VOICE_ID: str = "21m00Tcm4TlvDq8ikWAM"
     model_config = SettingsConfigDict(
         env_file=".env",

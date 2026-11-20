@@ -8,6 +8,7 @@ class ChatMessageOut(BaseModel):
     id: int
     session_id: int
     sender: MessageSender
+    doctor_thread_id: int | None = None
     content: str
     is_voice: bool
     created_at: datetime
@@ -17,6 +18,8 @@ class ChatMessageOut(BaseModel):
 class ChatSessionOut(BaseModel):
     id: int
     patient_id: int
+    doctor_id: int | None = None
+    doctor_thread_id: int | None = None
     status: ChatSessionStatus
     created_at: datetime
     updated_at: datetime

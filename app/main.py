@@ -1,7 +1,8 @@
+from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.background import BackgroundScheduler
-from fastapi import FastAPI
-
+from dotenv import load_dotenv
+load_dotenv()  
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.routers import (
@@ -15,6 +16,8 @@ from app.routers import (
     reviews,
     threads,
     voice,
+    voice_chat,          # <- Sirf yahan import hai, bilkul sahi
+    notifications,
 )
 from app.services.reminder_service import send_due_reminders
 
@@ -50,9 +53,18 @@ app.include_router(threads.router, prefix="/api/v1")
 app.include_router(reviews.router, prefix="/api/v1")
 app.include_router(qr.router, prefix="/api/v1")
 app.include_router(voice.router, prefix="/api/v1")
+app.include_router(notifications.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
+
+# Naya Voice Chat Router sirf ek dafa, app create hone ke baad add hoga
+app.include_router(voice_chat.router, prefix="/api/v1")
 
 
 @app.get("/health")
 def health():
     return {"status": "ok", "app": settings.APP_NAME}
+
+
+@app.get("/")
+def root():
+    return {"status": "ok", "docs": "/docs"}

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+
 from app.models.appointment import Appointment, AppointmentStatus
 from app.models.doctor import AvailabilityBlock
 from app.models.user import User, UserRole
@@ -12,10 +13,18 @@ from app.schemas.appointment import (
 )
 
 
+def _normalize_dt(dt: datetime) -> datetime:
+    """Ensure datetime is timezone-aware (assume UTC if naive)."""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 def _check_availability(
     db: Session, doctor_id: int, start: datetime, duration_minutes: int, exclude_id: int | None = None
 ) -> None:
     """Raise 409 if the requested slot conflicts with a block or existing booking."""
+    start = _normalize_dt(start)
     end = start + timedelta(minutes=duration_minutes)
 
     # 1. Overlaps an availability block?
@@ -45,7 +54,8 @@ def _check_availability(
     if exclude_id:
         q = q.filter(Appointment.id != exclude_id)
     for appt in q.all():
-        if appt.scheduled_at + timedelta(minutes=appt.duration_minutes) > start:
+        appt_start = _normalize_dt(appt.scheduled_at)
+        if appt_start + timedelta(minutes=appt.duration_minutes) > start:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Time slot already booked",
@@ -53,6 +63,10 @@ def _check_availability(
 
 
 def book_appointment(db: Session, patient: User, data: AppointmentCreate) -> Appointment:
+    # Normalize timezone (defense-in-depth — AI tool already normalizes, but
+    # REST API or other callers might send naive datetimes)
+    data.scheduled_at = _normalize_dt(data.scheduled_at)
+
     if data.scheduled_at <= datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Cannot book in the past")
 
@@ -118,6 +132,7 @@ def cancel_appointment(db: Session, appointment_id: int, current_user: User) -> 
 def reschedule_appointment(
     db: Session, appointment_id: int, new_time: datetime, current_user: User
 ) -> Appointment:
+    new_time = _normalize_dt(new_time)
     appt = get_appointment(db, appointment_id, current_user)
     if appt.status in (AppointmentStatus.CANCELLED, AppointmentStatus.COMPLETED):
         raise HTTPException(status_code=400, detail=f"Cannot reschedule (status={appt.status.value})")
@@ -137,6 +152,9 @@ def reschedule_appointment(
 def create_availability_block(
     db: Session, doctor_id: int, data: AvailabilityBlockCreate
 ) -> tuple[AvailabilityBlock, list[int]]:
+    data.start_time = _normalize_dt(data.start_time)
+    data.end_time = _normalize_dt(data.end_time)
+
     if data.end_time <= data.start_time:
         raise HTTPException(status_code=400, detail="end_time must be after start_time")
 
@@ -161,7 +179,7 @@ def create_availability_block(
     overlapping = [
         appt
         for appt in candidates
-        if appt.scheduled_at + timedelta(minutes=appt.duration_minutes) > data.start_time
+        if _normalize_dt(appt.scheduled_at) + timedelta(minutes=appt.duration_minutes) > data.start_time
     ]
     affected_ids = []
     for appt in overlapping:

@@ -69,6 +69,7 @@ class ThreadMessage(Base):
         SAEnum(ThreadSender, name="thread_sender"), nullable=False
     )
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

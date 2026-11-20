@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+body {
+  background: #f9f9ff;
+  color: #141b2b;
+  font-family: var(--font-dm-sans), ui-sans-serif, system-ui;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-outfit), ui-sans-serif, system-ui;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

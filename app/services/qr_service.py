@@ -1,4 +1,5 @@
 import base64
+import uuid
 from datetime import datetime, timedelta, timezone
 import io
 from fastapi import HTTPException
@@ -12,12 +13,13 @@ from app.models.user import User, UserRole
 
 
 def generate_token(patient_id: int) -> tuple[str, datetime]:
-    """Generate a signed JWT token valid for 365 days."""
-    exp = datetime.now(timezone.utc) + timedelta(days=365)
+    """Generate a signed JWT token valid for 15 minutes with jti nonce."""
+    exp = datetime.now(timezone.utc) + timedelta(minutes=15)
     payload = {
         "sub": str(patient_id),
         "purpose": "qr",
         "exp": exp,
+        "jti": str(uuid.uuid4()),  # unique nonce to prevent duplicate-second collisions
     }
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return token, exp
