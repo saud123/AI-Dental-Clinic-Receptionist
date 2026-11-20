@@ -101,13 +101,13 @@ def list_my_appointments(db: Session, patient_id: int) -> list[Appointment]:
     return (
         db.query(Appointment)
         .filter(Appointment.patient_id == patient_id)
-        .order_by(Appointment.scheduled_at.desc())
+        .order_by(Appointment.scheduled_at.asc())
         .all()
     )
 
 
 def list_all_appointments(db: Session) -> list[Appointment]:
-    return db.query(Appointment).order_by(Appointment.scheduled_at.desc()).all()
+    return db.query(Appointment).order_by(Appointment.scheduled_at.asc()).all()
 
 
 def get_appointment(db: Session, appointment_id: int, current_user: User) -> Appointment:

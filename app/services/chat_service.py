@@ -258,7 +258,7 @@ def _execute_clinic_tool(name: str, args: dict, db: Session, patient: User) -> d
         appts = (
             db.query(Appointment)
             .filter(Appointment.patient_id == patient.id)
-            .order_by(Appointment.scheduled_at.desc())
+            .order_by(Appointment.scheduled_at.asc())
             .limit(20)
             .all()
         )

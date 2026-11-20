@@ -56,6 +56,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setUser(null);
       if (typeof window !== "undefined") {
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+        } catch {
+          // ignore storage clearing errors
+        }
+        document.cookie.split(";").forEach((c) => {
+          document.cookie = c
+            .replace(/^ +/, "")
+            .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
         // eslint-disable-next-line @next/next/no-location-assign-relative-destination
         window.location.href = "/login";
       }

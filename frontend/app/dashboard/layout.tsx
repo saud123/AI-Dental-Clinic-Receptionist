@@ -91,10 +91,10 @@ function DashboardNavLinks({ role }: { role: UserRole }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-btn text-xs font-medium transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-btn text-xs font-medium transition-all duration-200",
                 isActive
-                  ? "bg-accent text-white font-semibold shadow-xs"
-                  : "text-text-muted hover:text-navy hover:bg-neutral-gray"
+                  ? "bg-slate-800 text-teal-400 font-semibold border-l-2 border-teal-400 shadow-sm shadow-teal-500/10"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
               )}
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -137,26 +137,26 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-bg-light flex flex-col md:flex-row">
       {/* 240px Sidebar */}
-      <aside className="w-full md:w-[240px] bg-white border-r border-border-default flex flex-col shrink-0">
-        <div className="p-4 border-b border-border-default flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-accent text-white flex items-center justify-center shadow-xs">
+      <aside className="w-full md:w-[240px] bg-slate-900 text-slate-300 border-r border-slate-800 flex flex-col shrink-0">
+        <div className="p-4 border-b border-slate-800 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 text-white flex items-center justify-center shadow-md">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="font-display font-bold text-base text-navy leading-none">
+            <h1 className="font-display font-bold text-base text-white leading-none">
               Smile Dental
             </h1>
-            <p className="text-[11px] text-text-muted mt-1 uppercase tracking-wider font-semibold">
+            <p className="text-[11px] text-slate-400 mt-1 uppercase tracking-wider font-semibold">
               Clinic Staff Portal
             </p>
           </div>
         </div>
 
         {/* User Card */}
-        <div className="p-3 border-b border-border-default bg-neutral-gray/50 flex items-center gap-2.5">
+        <div className="p-3 border-b border-slate-800 bg-slate-800/50 flex items-center gap-2.5">
           <Avatar name={user.full_name} size="md" />
           <div className="overflow-hidden flex-1">
-            <p className="text-xs font-semibold text-navy truncate">
+            <p className="text-xs font-semibold text-white truncate">
               {user.role === "doctor" ? `Dr. ${user.full_name}` : user.full_name}
             </p>
             <div className="flex items-center gap-1 mt-0.5">
@@ -177,17 +177,17 @@ export default function DashboardLayout({
         </div>
 
         {/* Navigation wrapped in Suspense */}
-        <Suspense fallback={<div className="flex-1 p-4 text-xs text-text-muted">Loading menu...</div>}>
+        <Suspense fallback={<div className="flex-1 p-4 text-xs text-slate-400">Loading menu...</div>}>
           <DashboardNavLinks role={user.role} />
         </Suspense>
 
         {/* Logout */}
-        <div className="p-3 border-t border-border-default">
+        <div className="p-3 border-t border-slate-800">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => logout()}
-            className="w-full justify-start text-xs text-text-muted hover:text-danger hover:bg-danger/10"
+            className="w-full justify-start text-xs text-slate-400 hover:text-rose-400 hover:bg-rose-500/10"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Sign Out

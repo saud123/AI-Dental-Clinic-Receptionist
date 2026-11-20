@@ -56,10 +56,10 @@ export function ChatBubble({
     >
       <div
         className={cn(
-          "px-4 py-3 text-sm shadow-elev1 relative group leading-relaxed",
+          "px-4 py-3 text-sm relative group leading-relaxed",
           isPatient
-            ? "bg-accent text-white rounded-[14px_14px_4px_14px]"
-            : "bg-[#CCFBF1] text-navy rounded-[14px_14px_14px_4px]"
+            ? "bg-gradient-to-br from-teal-50 to-teal-100 text-navy border border-teal-200 shadow-sm rounded-[14px_14px_4px_14px]"
+            : "bg-white shadow-sm border border-gray-100 text-navy rounded-[14px_14px_14px_4px]"
         )}
       >
         <div className="whitespace-pre-wrap">{content}</div>

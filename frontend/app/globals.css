@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: #f9f9ff;
   color: #141b2b;
@@ -13,4 +17,23 @@ h1, h2, h3, h4, h5, h6 {
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Custom Slim Webkit Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0d9488;
 }

@@ -119,11 +119,13 @@ export default function DashboardPage() {
           label="Total Patients"
           value={kpis?.total_patients.total ?? 0}
           subLabel={`+${kpis?.total_patients.new_this_month ?? 0} this month`}
+          className="bg-gradient-to-br from-white to-slate-50 shadow-md hover:shadow-xl border-slate-100/80"
         />
         <KpiCard
           label="Appointments Today"
           value={kpis?.appointments.today ?? 0}
           subLabel={`${kpis?.appointments.this_week ?? 0} scheduled this week`}
+          className="bg-gradient-to-br from-white to-teal-50/30 shadow-md hover:shadow-xl border-slate-100/80"
         />
         <KpiCard
           label="Pending Threads"
@@ -131,6 +133,7 @@ export default function DashboardPage() {
           subLabel={
             (kpis?.pending_threads ?? 0) > 0 ? "Awaiting reply" : "All caught up"
           }
+          className="bg-gradient-to-br from-white to-amber-50/30 shadow-md hover:shadow-xl border-slate-100/80"
         />
         <KpiCard
           label="Average Clinic Rating"
@@ -140,6 +143,7 @@ export default function DashboardPage() {
               : "5.0 ★"
           }
           subLabel={`${kpis?.rating.count ?? 0} verified patient reviews`}
+          className="bg-gradient-to-br from-white to-slate-50 shadow-md hover:shadow-xl border-slate-100/80"
         />
       </section>
 

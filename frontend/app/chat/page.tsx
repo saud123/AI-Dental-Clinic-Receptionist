@@ -28,6 +28,7 @@ import {
   CheckCircle2, Clock, XCircle, PhoneOff
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
 import { useVoiceAssistant } from "@/lib/useVoiceAssistant"; // Ensure import is correct
 
 // ============================================================================
@@ -49,12 +50,29 @@ interface SpeechRecognitionInstance {
 type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 
 function ChatContent() {
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const requestedSessionId = searchParams.get("session");
 
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSession, setActiveSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const prevUserIdRef = useRef<number | null | undefined>(undefined);
+
+  // Reset active session and messages on logout or user ID change (Session overlap protection)
+  useEffect(() => {
+    if (prevUserIdRef.current !== undefined && prevUserIdRef.current !== user?.id) {
+      setActiveSession(null);
+      setMessages([]);
+      setSessions([]);
+    }
+    prevUserIdRef.current = user?.id;
+    if (!user) {
+      setActiveSession(null);
+      setMessages([]);
+      setSessions([]);
+    }
+  }, [user]);
   const [inputMessage, setInputMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
@@ -457,21 +475,24 @@ function ChatContent() {
         </aside>
 
         {/* Main chat area */}
-        <main className="flex-1 flex flex-col bg-white border border-border-default rounded-card shadow-sm overflow-hidden relative">
+        <main className="flex-1 flex flex-col bg-white/70 backdrop-blur-xl shadow-2xl border border-white/20 rounded-2xl overflow-hidden relative">
           
           {/* Header */}
-          <header className="p-3.5 px-4 border-b border-border-default flex items-center justify-between bg-white z-10">
+          <header className="p-3.5 px-4 border-b border-border-default/60 flex items-center justify-between bg-white/80 backdrop-blur-md z-10">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center shadow-xs">
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white animate-pulse" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="font-display font-semibold text-base text-navy">AI Dental Receptionist</h1>
-                  <span className="text-[11px] text-emerald-600 font-medium">● Online</span>
+                  <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                    Online
+                  </span>
                 </div>
                 <p className="text-xs text-text-muted">Ask about treatments, book appointments, or request a doctor</p>
               </div>
@@ -495,7 +516,7 @@ function ChatContent() {
 
           {/* 👇 VOICE CALL UI OVERLAY 👇 */}
           {isVoiceModeActive ? (
-            <div className="absolute inset-0 bg-navy/95 z-50 flex flex-col items-center justify-center text-white p-6 backdrop-blur-sm transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-navy via-slate-900 to-navy z-50 flex flex-col items-center justify-center text-white p-6 backdrop-blur-md transition-all duration-300">
               <div className="w-32 h-32 rounded-full bg-accent/20 flex items-center justify-center mb-6 relative">
                 <div className={cn("absolute inset-0 rounded-full bg-accent/40 animate-ping", !isProcessing && "opacity-0")} />
                 {isProcessing ? <Sparkles className="w-12 h-12 text-accent animate-pulse" /> : <Mic className="w-12 h-12 text-accent" />}
