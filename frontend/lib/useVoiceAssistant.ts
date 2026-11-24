@@ -24,6 +24,7 @@ export function useVoiceAssistant(sessionId: number | null) {
   const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const hasSpokenRef = useRef(false);
+  const speechFramesRef = useRef(0);
 
   // Conversation control
   const isActiveRef = useRef(false);
@@ -208,6 +209,7 @@ export function useVoiceAssistant(sessionId: number | null) {
       audioChunksRef.current = [];
 
       hasSpokenRef.current = false;
+      speechFramesRef.current = 0;
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -227,8 +229,8 @@ export function useVoiceAssistant(sessionId: number | null) {
           type: mediaRecorder.mimeType || "audio/webm",
         });
 
-        // Ignore very short recordings
-        if (audioBlob.size < 1000) {
+        // If user never actually spoke, don't spam backend with ambient noise
+        if (!hasSpokenRef.current || audioBlob.size < 1200) {
           if (isActiveRef.current) {
             startRecording();
           }
@@ -317,22 +319,23 @@ export function useVoiceAssistant(sessionId: number | null) {
 
         let sum = 0;
 
-        // Focus on selected frequency bins
+        // Focus on selected vocal frequency bins (approx 300Hz - 3400Hz)
         for (let i = 2; i <= 45; i++) {
           sum += dataArray[i];
         }
 
         const average = sum / 44;
 
-        // Speech detected
-        if (average > 10) {
-          hasSpokenRef.current = true;
-
-          clearSilenceTimer();
-
-        } else if (hasSpokenRef.current && average < 10) {
-          // Only detect silence AFTER speech has started
-
+        // Speech detected (require vocal energy above room baseline across consecutive frames)
+        if (average > 24) {
+          speechFramesRef.current += 1;
+          if (speechFramesRef.current >= 3) {
+            hasSpokenRef.current = true;
+            clearSilenceTimer();
+          }
+        } else if (hasSpokenRef.current && average < 18) {
+          // Detect silence only AFTER verified speech has occurred
+          speechFramesRef.current = 0;
           if (!silenceTimeoutRef.current) {
             silenceTimeoutRef.current = setTimeout(() => {
               silenceTimeoutRef.current = null;
@@ -343,7 +346,7 @@ export function useVoiceAssistant(sessionId: number | null) {
               ) {
                 stopRecording();
               }
-            }, 1500);
+            }, 2200); // 2.2s natural pause threshold
           }
         }
 
@@ -439,7 +442,16 @@ export function useVoiceAssistant(sessionId: number | null) {
   }, [stopRecording]);
 
   // --------------------------------------------------
-  // 10. Cleanup when component unmounts
+  // 10. Manual Send (Push to Talk / Done Speaking)
+  // --------------------------------------------------
+
+  const sendNow = useCallback(() => {
+    hasSpokenRef.current = true;
+    stopRecording();
+  }, [stopRecording]);
+
+  // --------------------------------------------------
+  // 11. Cleanup when component unmounts
   // --------------------------------------------------
 
   useEffect(() => {
@@ -450,7 +462,7 @@ export function useVoiceAssistant(sessionId: number | null) {
   }, [stop]);
 
   // --------------------------------------------------
-  // 11. Return hook values
+  // 12. Return hook values
   // --------------------------------------------------
 
   return {
@@ -459,5 +471,6 @@ export function useVoiceAssistant(sessionId: number | null) {
     error,
     start,
     stop,
+    sendNow,
   };
 }

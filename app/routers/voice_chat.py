@@ -86,8 +86,8 @@ def _transcribe(audio_bytes: bytes, suffix: str = ".wav") -> str:
         with sr.AudioFile(tmp_wav) as source:
             audio = recognizer.record(source)
 
-        # Try English first; if empty → try Urdu
-        for lang in ("en-IN", "ur-PK"):
+        # Try English (US, IN) first; if empty → try Urdu
+        for lang in ("en-US", "en-IN", "ur-PK"):
             try:
                 result = recognizer.recognize_google(audio, language=lang)
                 if result and result.strip():

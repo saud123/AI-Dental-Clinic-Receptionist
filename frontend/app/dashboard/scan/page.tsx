@@ -87,7 +87,8 @@ export default function QrScannerPage() {
     await stopScanner();
 
     try {
-      const res = await resolveQr(token.trim());
+      const cleanToken = token.trim().replace(/^['"]|['"]$/g, "");
+      const res = await resolveQr(cleanToken);
       setResolvedPatient(res);
       setManualToken("");
     } catch (err: unknown) {

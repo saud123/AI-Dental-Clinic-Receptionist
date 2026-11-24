@@ -49,7 +49,7 @@ export function ChatBubble({
   return (
     <div
       className={cn(
-        "flex flex-col mb-4 max-w-[80%]",
+        "flex flex-col mb-4 max-w-[80%] animate-fade-in-up",
         isPatient ? "ml-auto items-end" : "mr-auto items-start",
         className
       )}

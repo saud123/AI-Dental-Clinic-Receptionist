@@ -36,7 +36,8 @@ def resolve_qr(
     current_user: User = Depends(require_role(UserRole.DOCTOR, UserRole.ASSISTANT, UserRole.ADMIN)),
     db: Session = Depends(get_db),
 ):
-    patient_user = qr_service.resolve_token(db, payload.token)
+    token = payload.token.strip().strip('"').strip("'")
+    patient_user = qr_service.resolve_token(db, token)
     phone = patient_user.patient_profile.phone if patient_user.patient_profile else None
 
     now = datetime.now(timezone.utc)

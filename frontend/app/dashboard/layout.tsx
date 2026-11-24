@@ -62,16 +62,13 @@ function DashboardNavLinks({ role }: { role: UserRole }) {
       show: true,
       exact: false,
     },
-  /* 
     {
       href: "/dashboard/scan",
       label: "Check-in Scanner",
       icon: QrCode,
-      show: isAssistant,
+      show: isDoctor || isAssistant,
       exact: false,
     },
-  */
- 
   ];
 
   return (

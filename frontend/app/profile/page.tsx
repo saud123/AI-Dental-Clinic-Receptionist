@@ -38,13 +38,18 @@ export default function ProfilePage() {
 
   const fetchData = async () => {
     try {
-      const [p, q] = await Promise.all([getPatientMe(), getMyQr()]);
-      setProfile(p);
-      setQr(q);
-      setFullName(p.full_name || "");
-      setPhone(p.phone || "");
-      setDateOfBirth(p.date_of_birth ? p.date_of_birth.split("T")[0] : "");
-      setAddress(p.address || "");
+      const [pRes, qRes] = await Promise.allSettled([getPatientMe(), getMyQr()]);
+      if (pRes.status === "fulfilled") {
+        const p = pRes.value;
+        setProfile(p);
+        setFullName(p.full_name || "");
+        setPhone(p.phone || "");
+        setDateOfBirth(p.date_of_birth ? p.date_of_birth.split("T")[0] : "");
+        setAddress(p.address || "");
+      }
+      if (qRes.status === "fulfilled") {
+        setQr(qRes.value);
+      }
     } catch (err) {
       console.error("Failed to load profile or QR:", err);
     } finally {
@@ -239,13 +244,20 @@ export default function ProfilePage() {
               </CardHeader>
 
               <CardContent className="pt-6 flex-1 flex flex-col items-center justify-between text-center space-y-4">
-                <div className="p-4 bg-white border-2 border-dashed border-border-default rounded-card shadow-xs">
+                <div className="p-4 bg-white border-2 border-dashed border-border-default rounded-card shadow-md animate-float">
                   {qr?.token ? (
                     <QRCodeSVG
                       value={qr.token}
                       size={180}
                       level="H"
                       className="rounded"
+                    />
+                  ) : qr?.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={qr.image}
+                      alt="Check-in QR"
+                      className="w-[180px] h-[180px] object-contain rounded"
                     />
                   ) : (
                     <div className="w-[180px] h-[180px] bg-neutral-gray flex items-center justify-center text-xs text-text-muted">
@@ -257,9 +269,13 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   <div className="inline-flex items-center gap-1.5 text-xs text-accent bg-mint-soft px-3 py-1 rounded-pill font-mono font-medium">
                     <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>{qr?.token || "NO_TOKEN"}</span>
+                    <span>
+                      {qr?.token
+                        ? `Token: ${qr.token.slice(0, 10)}...${qr.token.slice(-6)}`
+                        : "NO_TOKEN"}
+                    </span>
                   </div>
-                  <p className="text-xs text-text-muted max-w-[220px] mx-auto">
+                  <p className="text-xs text-text-muted max-w-[240px] mx-auto">
                     The front desk assistant scans this code to instantly verify your appointment and check you in.
                   </p>
                 </div>

@@ -104,8 +104,7 @@ function ChatContent() {
 
   // --- VOICE ASSISTANT STATE ---
   const [isVoiceModeActive, setIsVoiceModeActive] = useState(false);
-  // token line hatadi gayi hai
-  const { isProcessing, error, start, stop } = useVoiceAssistant(activeSession?.id || null);
+  const { isProcessing, error, start, stop, sendNow } = useVoiceAssistant(activeSession?.id || null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -516,30 +515,54 @@ function ChatContent() {
 
           {/* 👇 VOICE CALL UI OVERLAY 👇 */}
           {isVoiceModeActive ? (
-            <div className="absolute inset-0 bg-gradient-to-br from-navy via-slate-900 to-navy z-50 flex flex-col items-center justify-center text-white p-6 backdrop-blur-md transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-navy via-slate-900 to-navy animate-gradient-pulse z-50 flex flex-col items-center justify-center text-white p-6 backdrop-blur-md transition-all duration-300">
               <div className="w-32 h-32 rounded-full bg-accent/20 flex items-center justify-center mb-6 relative">
-                <div className={cn("absolute inset-0 rounded-full bg-accent/40 animate-ping", !isProcessing && "opacity-0")} />
-                {isProcessing ? <Sparkles className="w-12 h-12 text-accent animate-pulse" /> : <Mic className="w-12 h-12 text-accent" />}
+                <div className={cn("absolute inset-0 rounded-full bg-accent/30 animate-pulse-wave", isProcessing ? "opacity-30" : "opacity-100")} />
+                {isProcessing ? (
+                  <Sparkles className="w-12 h-12 text-accent animate-pulse" />
+                ) : (
+                  <Mic className="w-12 h-12 text-accent" />
+                )}
               </div>
               
-              <h2 className="text-2xl font-semibold mb-2">
-                {isProcessing ? "AI is thinking..." : "Listening..."}
+              <h2 className="text-2xl font-semibold mb-2 tracking-tight">
+                {isProcessing ? "AI is thinking..." : "Listening to you..."}
               </h2>
-              <p className="text-white/60 text-sm mb-12 text-center max-w-sm">
-                {isProcessing ? "Processing your request and generating voice response." : "Speak clearly. I will stop listening when you pause."}
+              <p className="text-white/70 text-sm mb-8 text-center max-w-sm">
+                {isProcessing
+                  ? "Processing your request and generating voice response."
+                  : "Speak clearly. I will automatically respond when you pause, or click 'Done Speaking'."}
               </p>
               
-              {error && <p className="text-red-400 text-sm mb-4 bg-red-900/30 px-4 py-2 rounded-lg">{error}</p>}
+              {error && (
+                <p className="text-red-300 text-sm mb-6 bg-red-900/40 border border-red-700/50 px-4 py-2 rounded-lg">
+                  {error}
+                </p>
+              )}
 
-              <Button 
-                variant="danger" 
-                size="lg" 
-                onClick={endVoiceCall}
-                className="rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30 h-14 px-8"
-              >
-                <PhoneOff className="w-5 h-5 mr-2" />
-                End Call
-              </Button>
+              <div className="flex items-center gap-4">
+                {!isProcessing && (
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="lg"
+                    onClick={sendNow}
+                    className="rounded-full shadow-lg h-12 px-6 text-sm font-semibold"
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Done Speaking
+                  </Button>
+                )}
+                <Button 
+                  variant="danger" 
+                  size="lg" 
+                  onClick={endVoiceCall}
+                  className="rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30 h-12 px-6 text-sm font-semibold"
+                >
+                  <PhoneOff className="w-4 h-4 mr-2" />
+                  End Call
+                </Button>
+              </div>
             </div>
           ) : (
             // 👇 NORMAL TEXT CHAT UI 👇

@@ -27,6 +27,7 @@ def generate_token(patient_id: int) -> tuple[str, datetime]:
 
 def decode_token(token: str) -> int:
     """Verify and decode a QR token returning patient_id."""
+    token = token.strip().strip('"').strip("'")
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         if payload.get("purpose") != "qr":
